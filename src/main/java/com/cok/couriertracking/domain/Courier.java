@@ -17,11 +17,10 @@ public class Courier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name",nullable = false)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
-
-    @Column(name = "license_plate",nullable = false)
+    @Column(name = "license_plate", nullable = false)
     private String licensePlate;
 
     @Column(name = "total_distance")
