@@ -6,7 +6,6 @@ public record CourierGeolocationResponse (
         Long courierId,
         Double lat,
         Double lng,
-        LocalDateTime timestamp,
-        Double totalDistance
+        LocalDateTime timestamp
 ) {
 }

@@ -1,0 +1,184 @@
+{
+	"info": {
+		"_postman_id": "4408bcb8-a3e5-4868-88a1-da970f4861dc",
+		"name": "CourierTracking",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32455749"
+	},
+	"item": [
+		{
+			"name": "Courier",
+			"item": [
+				{
+					"name": "CreateCourier",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"canokan\",\n  \"licensePlate\": \"34KTV616\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/courier",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"courier"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteCourier",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"canokan\",\n  \"licensePlate\": \"34KTV616\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/courier/100",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"courier",
+								"100"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCourier",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/courier/4",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"courier",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetTotalDistance",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"courierId\": 5,\n    \"lat\": 41.0082,\n    \"lng\": 28.9784\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/couriers/1/total-distance",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"couriers",
+								"1",
+								"total-distance"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GeoLocation",
+			"item": [
+				{
+					"name": "addLocation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courierId\": 2,\n  \"lat\": 41.0558,\n  \"lng\": 29.0210\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/couriers/geolocations",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"couriers",
+								"geolocations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "locationOptimisticLockTest",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"courierId\": 1,\n    \"lat\": 45.0558,\n    \"lng\": 29.0210\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/couriers/geolocations",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"couriers",
+								"geolocations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

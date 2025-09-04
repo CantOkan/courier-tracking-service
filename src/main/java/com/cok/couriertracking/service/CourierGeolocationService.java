@@ -1,25 +1,24 @@
 package com.cok.couriertracking.service;
 
-import com.cok.couriertracking.domain.CourierGeolocation;
+import com.cok.couriertracking.domain.Courier;
 import com.cok.couriertracking.dto.CourierGeolocationResponse;
 import com.cok.couriertracking.dto.CreateCourierGeolocationRequest;
 import com.cok.couriertracking.exception.GeolocationRetryFailedException;
-import com.cok.couriertracking.repository.CourierGeolocationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CourierGeolocationService {
 
-    private final CourierGeolocationRepository courierGeolocationRepository;
     private final CourierTrackingService courierTrackingService;
+    private final CourierService courierService;
+
 
     public CourierGeolocationResponse createLocation(CreateCourierGeolocationRequest request) {
         int retries = 0;
@@ -39,8 +38,7 @@ public class CourierGeolocationService {
 
     @Transactional(readOnly = true)
     public double getTotalTravelDistance(Long courierId) {
-        List<CourierGeolocation> logs = courierGeolocationRepository.findByCourierIdOrderByTimestampAsc(courierId);
-        return logs.isEmpty() ? 0.0 : logs.getLast().getTotalDistance();
+        Courier courier = courierService.findById(courierId);
+        return courier.getTotalDistance();
     }
-
 }

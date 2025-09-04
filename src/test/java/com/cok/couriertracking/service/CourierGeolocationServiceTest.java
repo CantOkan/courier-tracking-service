@@ -1,10 +1,8 @@
 package com.cok.couriertracking.service;
 
 import com.cok.couriertracking.domain.Courier;
-import com.cok.couriertracking.domain.CourierGeolocation;
 import com.cok.couriertracking.dto.CourierGeolocationResponse;
 import com.cok.couriertracking.dto.CreateCourierGeolocationRequest;
-import com.cok.couriertracking.repository.CourierGeolocationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,10 +24,10 @@ class CourierGeolocationServiceTest {
     private static final Double LNG = 28.9784;
 
     @Mock
-    private CourierGeolocationRepository courierGeolocationRepository;
+    private CourierTrackingService courierTrackingService;
 
     @Mock
-    private CourierTrackingService courierTrackingService;
+    private CourierService courierService;
 
     @InjectMocks
     private CourierGeolocationService courierGeolocationService;
@@ -49,7 +46,6 @@ class CourierGeolocationServiceTest {
         assertEquals(COURIER_ID, result.courierId());
         assertEquals(LAT, result.lat());
         assertEquals(LNG, result.lng());
-        assertEquals(100.0, result.totalDistance());
 
         verify(courierTrackingService, times(1)).persistLocation(request);
     }
@@ -58,11 +54,9 @@ class CourierGeolocationServiceTest {
     void Should_ThrowRuntimeException_When_OptimisticLockFailureExceedsMaxRetries() {
         CreateCourierGeolocationRequest request = generateCreateLocationRequest();
 
-        when(courierTrackingService.persistLocation(request))
-                .thenThrow(new ObjectOptimisticLockingFailureException("Lock failure", new RuntimeException()));
+        when(courierTrackingService.persistLocation(request)).thenThrow(new ObjectOptimisticLockingFailureException("Lock failure", new RuntimeException()));
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> courierGeolocationService.createLocation(request));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> courierGeolocationService.createLocation(request));
 
         assertEquals(String.format("Failed to save courier location after 4 retries for courier %d", COURIER_ID), exception.getMessage());
         assertInstanceOf(ObjectOptimisticLockingFailureException.class, exception.getCause());
@@ -73,19 +67,14 @@ class CourierGeolocationServiceTest {
     void Should_ReturnTotalDistanceFromLastLog_When_CourierGeolocationLogsExist() {
         Long courierId = 1L;
         double expectedTotalDistance = 1500.0;
-        List<CourierGeolocation> logs = List.of(
-                generateCourierGeolocation(500.0),
-                generateCourierGeolocation(1000.0),
-                generateCourierGeolocation(expectedTotalDistance)
-        );
+        Courier courier = generateCourier();
+        courier.setTotalDistance(expectedTotalDistance);
 
-        when(courierGeolocationRepository.findByCourierIdOrderByTimestampAsc(courierId))
-                .thenReturn(logs);
-
+        when(courierService.findById(courierId)).thenReturn(courier);
         double result = courierGeolocationService.getTotalTravelDistance(courierId);
 
         assertEquals(expectedTotalDistance, result);
-        verify(courierGeolocationRepository, times(1)).findByCourierIdOrderByTimestampAsc(courierId);
+        verify(courierService, times(1)).findById(courierId);
     }
 
     private CreateCourierGeolocationRequest generateCreateLocationRequest() {
@@ -93,7 +82,7 @@ class CourierGeolocationServiceTest {
     }
 
     private CourierGeolocationResponse generateLocationResponse() {
-        return new CourierGeolocationResponse(COURIER_ID, LAT, LNG, LocalDateTime.now(), 100.0);
+        return new CourierGeolocationResponse(COURIER_ID, LAT, LNG, LocalDateTime.now());
     }
 
     private Courier generateCourier() {
@@ -104,15 +93,5 @@ class CourierGeolocationServiceTest {
         return courier;
     }
 
-    private CourierGeolocation generateCourierGeolocation(double totalDistance) {
-        return CourierGeolocation.builder()
-                .id(1L)
-                .courier(generateCourier())
-                .lat(LAT)
-                .lng(LNG)
-                .timestamp(LocalDateTime.now())
-                .totalDistance(totalDistance)
-                .build();
-    }
 
 }
