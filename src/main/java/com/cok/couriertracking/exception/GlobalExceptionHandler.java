@@ -28,4 +28,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new Response<>(validationErrors), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(GeolocationRetryFailedException.class)
+    public ResponseEntity<Map<String, Object>> handleGeolocationRetryFailed(GeolocationRetryFailedException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "Geolocation update failed");
+        body.put("courierId", ex.getCourierId());
+        body.put("retries", ex.getRetries());
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
 }
