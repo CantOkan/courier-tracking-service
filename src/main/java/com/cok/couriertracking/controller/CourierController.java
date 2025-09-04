@@ -3,6 +3,7 @@ package com.cok.couriertracking.controller;
 import com.cok.couriertracking.domain.Courier;
 import com.cok.couriertracking.dto.CourierRequest;
 import com.cok.couriertracking.dto.Response;
+import com.cok.couriertracking.service.CourierGeolocationService;
 import com.cok.couriertracking.service.CourierService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -13,10 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/courier")
+@RequestMapping("api/v1/couriers")
 public class CourierController {
 
     private final CourierService courierService;
+    private final CourierGeolocationService courierGeolocationService;
 
     @PostMapping
     public ResponseEntity<Response<Courier>> create(@RequestBody @Valid CourierRequest request) {
@@ -35,4 +37,11 @@ public class CourierController {
         courierService.delete(id);
         return new ResponseEntity<>(new Response<>("Courier deleted"), HttpStatus.OK);
     }
+
+    @GetMapping("/{courierId}/total-distance")
+    public ResponseEntity<Response<Double>> getTotalDistance(@PathVariable @NotNull Long courierId) {
+        double totalTravelDistance = courierGeolocationService.getTotalTravelDistance(courierId);
+        return new ResponseEntity<>(new Response<>(totalTravelDistance), HttpStatus.OK);
+    }
+
 }
