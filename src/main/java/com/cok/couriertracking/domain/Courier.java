@@ -23,4 +23,10 @@ public class Courier {
 
     @Column(name = "license_plate",nullable = false)
     private String licensePlate;
+
+    @Column(name = "total_distance")
+    private double totalDistance = 0.0;
+
+    @Version
+    private Long version;
 }

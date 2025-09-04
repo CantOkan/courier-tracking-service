@@ -26,13 +26,11 @@ public class CourierTrackingService {
     private final StoreLoader storeLoader;
     private final List<CourierStoreObserver> observers;
 
-    private static final double STORE_RADIUS_KM = 0.1; // 100 meters = 0.1 km
+    private static final double STORE_RADIUS_METERS = 100.0;
 
     @Transactional
     protected CourierGeolocationResponse persistLocation(CreateCourierGeolocationRequest request) {
         Courier courier = courierService.findById(request.courierId());
-
-        double totalDistance = 0.0;
 
         List<CourierGeolocation> logs = courierGeolocationRepository.findByCourierIdOrderByTimestampAsc(courier.getId());
 
@@ -42,7 +40,7 @@ public class CourierTrackingService {
                     lastLog.getLat(), lastLog.getLng(),
                     request.lat(), request.lng()
             );
-            totalDistance = lastLog.getTotalDistance() + distance;
+            courier.setTotalDistance(courier.getTotalDistance() + distance);
         }
 
         CourierGeolocation newLog = CourierGeolocation.builder()
@@ -50,12 +48,11 @@ public class CourierTrackingService {
                 .lat(request.lat())
                 .lng(request.lng())
                 .timestamp(LocalDateTime.now())
-                .totalDistance(totalDistance)
                 .build();
 
         CourierGeolocation saved = courierGeolocationRepository.save(newLog);
         checkDistanceAndPublishEvent(courier, saved);
-        return new CourierGeolocationResponse(courier.getId(), saved.getLat(), saved.getLng(), saved.getTimestamp(), saved.getTotalDistance());
+        return new CourierGeolocationResponse(courier.getId(), saved.getLat(), saved.getLng(), saved.getTimestamp());
     }
 
     public void checkDistanceAndPublishEvent(Courier courier, CourierGeolocation location) {
@@ -64,7 +61,7 @@ public class CourierTrackingService {
                     location.getLat(), location.getLng(),
                     store.getLat(), store.getLng()
             );
-            if (distance <= STORE_RADIUS_KM) {
+            if (distance <= STORE_RADIUS_METERS) {
                 CourierNearStoreEvent event = CourierNearStoreEvent.builder().courier(courier).store(store).timestamp(LocalDateTime.now()).build();
                 observers.forEach(observer -> observer.handle(event));
             }

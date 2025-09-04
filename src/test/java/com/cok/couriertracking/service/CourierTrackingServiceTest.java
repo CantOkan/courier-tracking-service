@@ -31,8 +31,8 @@ class CourierTrackingServiceTest {
     private static final Long COURIER_ID = 1L;
     private static final Double LAT = 41.0082;
     private static final Double LNG = 28.9784;
-    private static final Double DISTANCE_WITHIN_RADIUS = 0.01;
-    private static final Double DISTANCE_OUTSIDE_RADIUS_RADIUS = 0.2;
+    private static final Double DISTANCE_WITHIN_RADIUS = 50.0;
+    private static final Double DISTANCE_OUTSIDE_RADIUS = 150.0;
 
     @Mock
     private CourierGeolocationRepository courierGeolocationRepository;
@@ -69,7 +69,7 @@ class CourierTrackingServiceTest {
         assertEquals(LAT, result.lat());
         assertEquals(LNG, result.lng());
 
-        assertThat(result.totalDistance()).isEqualTo(0.0);
+        assertThat(courier.getTotalDistance()).isEqualTo(0.0);
 
         verify(courierService, times(1)).findById(COURIER_ID);
         verify(courierGeolocationRepository, times(1)).findByCourierIdOrderByTimestampAsc(COURIER_ID);
@@ -81,6 +81,7 @@ class CourierTrackingServiceTest {
     void Should_CalculateDistanceAndPersistLocation_When_PreviousLocationsExist() {
         CreateCourierGeolocationRequest request = new CreateCourierGeolocationRequest(COURIER_ID, LAT, LNG);
         Courier courier = generateCourier();
+        courier.setTotalDistance(500.0);
         CourierGeolocation previousLocation = generateCourierGeolocation(500, 40.0, 29.0);
         List<CourierGeolocation> previousLogs = List.of(previousLocation);
         CourierGeolocation savedLocation = generateCourierGeolocation(1500.0, LAT, LNG);
@@ -95,7 +96,7 @@ class CourierTrackingServiceTest {
 
         assertThat(result).isNotNull();
         assertEquals(COURIER_ID, result.courierId());
-        assertThat(result.totalDistance()).isEqualTo(1500.0); // 500 (previous) + 1000 (calculated)
+        assertThat(courier.getTotalDistance()).isEqualTo(1500.0); // 500 (previous) + 1000 (calculated)
 
         verify(courierService, times(1)).findById(COURIER_ID);
         verify(courierGeolocationRepository, times(1)).findByCourierIdOrderByTimestampAsc(COURIER_ID);
@@ -135,7 +136,7 @@ class CourierTrackingServiceTest {
 
         ReflectionTestUtils.setField(courierTrackingService, "observers", List.of(observer1));
         when(storeLoader.getStores()).thenReturn(stores);
-        when(distanceCalculator.calculateDistance(LAT, LNG, storeLat, storeLng)).thenReturn(DISTANCE_OUTSIDE_RADIUS_RADIUS);
+        when(distanceCalculator.calculateDistance(LAT, LNG, storeLat, storeLng)).thenReturn(DISTANCE_OUTSIDE_RADIUS);
 
         courierTrackingService.checkDistanceAndPublishEvent(courier, location);
 
