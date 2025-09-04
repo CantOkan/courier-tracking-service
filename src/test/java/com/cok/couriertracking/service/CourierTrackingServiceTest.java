@@ -56,7 +56,7 @@ class CourierTrackingServiceTest {
     void Should_PersistLocationAndReturnResponse_When_FirstLocationForCourier() {
         CreateCourierGeolocationRequest request = generateCourierGeolocationRequest();
         Courier courier = generateCourier();
-        CourierGeolocation savedLocation = generateCourierGeolocation(0.0, LAT, LNG);
+        CourierGeolocation savedLocation = generateCourierGeolocation(LAT, LNG);
 
         when(courierService.findById(COURIER_ID)).thenReturn(courier);
         when(courierGeolocationRepository.findByCourierIdOrderByTimestampAsc(COURIER_ID)).thenReturn(Collections.emptyList());
@@ -82,9 +82,9 @@ class CourierTrackingServiceTest {
         CreateCourierGeolocationRequest request = new CreateCourierGeolocationRequest(COURIER_ID, LAT, LNG);
         Courier courier = generateCourier();
         courier.setTotalDistance(500.0);
-        CourierGeolocation previousLocation = generateCourierGeolocation(500, 40.0, 29.0);
+        CourierGeolocation previousLocation = generateCourierGeolocation(40.0, 29.0);
         List<CourierGeolocation> previousLogs = List.of(previousLocation);
-        CourierGeolocation savedLocation = generateCourierGeolocation(1500.0, LAT, LNG);
+        CourierGeolocation savedLocation = generateCourierGeolocation(LAT, LNG);
         double calculatedDistance = 1000.0;
 
         when(courierService.findById(COURIER_ID)).thenReturn(courier);
@@ -110,7 +110,7 @@ class CourierTrackingServiceTest {
         double storeLng = 30.0;
 
         Courier courier = generateCourier();
-        CourierGeolocation location = generateCourierGeolocation(100.0, LAT, LNG);
+        CourierGeolocation location = generateCourierGeolocation(LAT, LNG);
         Store store = generateStore();
 
         ReflectionTestUtils.setField(courierTrackingService, "observers", List.of(observer1));
@@ -124,13 +124,12 @@ class CourierTrackingServiceTest {
         verify(observer1, times(1)).handle(any(CourierNearStoreEvent.class));
     }
 
-
     @Test
     void Should_NotPublishEvent_When_CourierIsOutsideStoreRadius() {
         double storeLat = 42.0;
         double storeLng = 30.0;
         Courier courier = generateCourier();
-        CourierGeolocation location = generateCourierGeolocation(100.0, LAT, LNG);
+        CourierGeolocation location = generateCourierGeolocation(LAT, LNG);
         Store store = generateStore();
         List<Store> stores = List.of(store);
 
@@ -145,7 +144,6 @@ class CourierTrackingServiceTest {
         verify(observer1, never()).handle(any(CourierNearStoreEvent.class));
     }
 
-
     private CreateCourierGeolocationRequest generateCourierGeolocationRequest() {
         return new CreateCourierGeolocationRequest(COURIER_ID, LAT, LNG);
     }
@@ -158,14 +156,13 @@ class CourierTrackingServiceTest {
         return courier;
     }
 
-    private CourierGeolocation generateCourierGeolocation(double totalDistance, double lat, double lng) {
+    private CourierGeolocation generateCourierGeolocation(double lat, double lng) {
         return CourierGeolocation.builder()
                 .id(1L)
                 .courier(generateCourier())
                 .lat(lat)
                 .lng(lng)
                 .timestamp(LocalDateTime.now())
-                .totalDistance(totalDistance)
                 .build();
     }
 

@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Entity(name = "courier_geolocations")
 public class CourierGeolocation {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,11 +29,5 @@ public class CourierGeolocation {
 
     @Column(name = "time", nullable = false)
     private LocalDateTime timestamp;
-
-    @Column(name = "total_distance")
-    private double totalDistance = 0.0;
-
-    @Version
-    private Long version;
 
 }
